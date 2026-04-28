@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Project 3</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: white;
+      width: 400px;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 0;
+      color: #333;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    input:focus {
+      border-color: #667eea;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .add-btn {
+      background: #28a745;
+    }
+
+    .show-btn {
+      background: #007bff;
+    }
+
+    button:hover {
+      opacity: 0.85;
+      transform: scale(1.02);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    li {
+      background: #f1f3f6;
+      padding: 10px;
+      border-radius: 8px;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .delete-btn {
+      background: red;
+      border: none;
+      color: white;
+      padding: 5px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+  </style>
+
+</head>
+<body>
+
+<div class="container">
+  <h2>User Manager</h2>
+
+  <div class="input-group">
+    <input id="name" placeholder="Enter Name">
+    <input id="email" placeholder="Enter Email">
+  </div>
+
+  <div class="btn-group">
+    <button class="add-btn" onclick="addUser()">Add</button>
+    <button class="show-btn" onclick="getUsers()">Show</button>
+  </div>
+
+  <ul id="list"></ul>
+</div>
+
+<script>
+async function addUser() {
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+
+  if (!name || !email) {
+    alert("Enter name and email");
+    return;
+  }
+
+  await fetch("http://localhost:5000/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email })
+  });
+
+  alert("Added!");
+}
+
+async function getUsers() {
+  const res = await fetch("http://localhost:5000/users");
+  const data = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  data.forEach(u => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      ${u.name} - ${u.email}
+      <button class="delete-btn" onclick="deleteUser('${u._id}')">X</button>
+    `;
+    list.appendChild(li);
+  });
+}
+
+async function deleteUser(id) {
+  await fetch("http://localhost:5000/delete/" + id, {
+    method: "DELETE"
+  });
+  getUsers();
+}
+</script>
+
+</body>
+</html>
